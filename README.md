@@ -1,2 +1,2 @@
 # easytools
-Do some simple tools to save time
+Do some easy tools to save time
