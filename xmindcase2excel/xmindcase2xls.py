@@ -200,9 +200,6 @@ class XmindToXsl(XlwtSeting):
 
 
 if __name__ == "__main__":
-    names = "test.xmind"
+    names = "./dist/test.xmind"
     xx = XmindToXsl(names)
     xx.write_excel()
-
-
-
