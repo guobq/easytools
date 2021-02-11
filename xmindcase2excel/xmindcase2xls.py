@@ -11,7 +11,7 @@ import xlwt
 class XlwtSeting(object):
 
     @staticmethod  # 静态方法装饰器，使用此装饰器装饰后，可以直接使用类名.方法名调用（XlwtSeting.styles()），并且不需要self参数
-    def template_one(worksheet):
+    def template_style_for_title(worksheet):
         dicts = {"horz": "CENTER", "vert": "CENTER"}
 
         sizes = [15, 15, 30, 60, 45, 45, 15, 15]
@@ -28,7 +28,7 @@ class XlwtSeting(object):
         return style
 
     @staticmethod
-    def template_two():
+    def template_style_for_data():
         dicts2 = {"vert": "CENTER"}
         se = XlwtSeting()
         style = se.styles()
@@ -150,15 +150,15 @@ class XmindToXsl(XlwtSeting):
     def write_excel(self, result='', performer='', editionname=''):
         """生成excel文件的方法"""
 
-        row0 = ["testcaseid", '需求名称', '测试用例名称', '执行步骤', '预期结果', '实际结果', '执行人员', '版本']
-        style2 = self.template_one(self.worksheet)
+        row0 = ["testcaseid", '模块名称', '测试用例名称', '执行步骤', '预期结果', '实际结果', '执行人员', '版本']
+        title_style = self.template_style_for_title(self.worksheet)
         for i in range(len(row0)):
-            self.worksheet.write(0, i, row0[i], style2)
+            self.worksheet.write(0, i, row0[i], title_style)
 
-        style = self.template_two()
+        data_style = self.template_style_for_data()
 
-        x = 0  # 写入数据的当前行数
-        z = 0  # 用例的编号
+        row_num = 0  # 写入数据的当前行数
+        case_id = 0  # 用例的编号
         for i in range(self.xmind_num(self.xm)):
             test_module = self.xm["topics"][i]
             modnum = self.xmind_num(test_module)
@@ -169,26 +169,35 @@ class XmindToXsl(XlwtSeting):
                     if suit_num != 0:
                         for k in range(suit_num):
                             test_case = test_suit["topics"][k]
-                            z += 1
-                            c1 = self.xmind_num(test_case)  # 执行步骤有几个
-                            if c1 != 0:
-                                for n in range(c1):
-                                    x += 1
+                            case_id += 1
+                            row_num += 1
+                            step_count = self.xmind_num(test_case)  # 执行步骤有几个
+                            step = ''
+                            except_result = ''
+                            if step_count != 0:
+                                for n in range(step_count):
+                                    # row_num += 1
                                     test_step = test_case["topics"][n]
                                     test_except = test_step["topics"][0]
-                                    self.heights(self.worksheet, x, size=2)
-                                    step = f"{n + 1}." + self.xmind_title(test_step)  # 执行步骤
-                                    exce = f"{n + 1}." + self.xmind_title(test_except)  # 预期结果
-                                    self.worksheet.write(x, 3, step, style)  # 写入执行步骤
-                                    self.worksheet.write(x, 4, exce, style)  # 写入预期结果
-                                    self.worksheet.write(x, 5, result, style)  # 写入实际结果
-                                    self.worksheet.write(x, 6, performer, style)  # 写入执行人
+                                    self.heights(self.worksheet, row_num, size=step_count + 1)
+                                    step = step + self.xmind_title(test_step) + '\r\n'  # 执行步骤
+                                    except_result = except_result + self.xmind_title(test_except) + '\r\n'  # 预期结果
+                                    self.worksheet.write(row_num, 3, step, data_style)  # 写入执行步骤
+                                    self.worksheet.write(row_num, 4, except_result, data_style)  # 写入预期结果
+                                self.worksheet.write(row_num, 5, result, data_style)  # 写入实际结果
+                                self.worksheet.write(row_num, 6, performer, data_style)  # 写入执行人
                                 mod = self.xmind_title(test_module)  # 测试需求名称
                                 case = self.xmind_title(test_case)  # 测试用例名称
-                                self.worksheet.write_merge(x - c1 + 1, x, 0, 0, z, style)  # 写入testcaseid
-                                self.worksheet.write_merge(x - c1 + 1, x, 1, 1, mod, style)  # 写入测试模块名称
-                                self.worksheet.write_merge(x - c1 + 1, x, 2, 2, case, style)  # 写入测试用例名称
-                                self.worksheet.write_merge(x - c1 + 1, x, 7, 7, editionname, style)  # 写入版本名称
+                                # self.worksheet.write_merge(row_num - step_count + 1, row_num, 0, 0, case_id, data_style)  # 写入testcaseid
+                                # self.worksheet.write_merge(row_num - step_count + 1, row_num, 1, 1, mod, data_style)  # 写入测试模块名称
+                                # self.worksheet.write_merge(row_num - step_count + 1, row_num, 2, 2, case, data_style)  # 写入测试用例名称
+                                # self.worksheet.write_merge(row_num - step_count + 1, row_num, 7, 7, editionname, data_style)  # 写入版本名称
+
+                                self.worksheet.write(row_num, 0, case_id, data_style)  # 写入testcaseid
+                                self.worksheet.write(row_num, 1, mod, data_style)  # 写入测试模块名称
+                                self.worksheet.write(row_num, 2, case, data_style)  # 写入测试用例名称
+                                self.worksheet.write(row_num, 7, editionname, data_style)  # 写入版本名称
+
                             else:
                                 print("测试用例没有操作步骤及预期结果")
                     else:

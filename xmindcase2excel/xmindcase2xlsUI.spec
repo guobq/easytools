@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['xmindcase2xlsUI.py'],
-             pathex=['xmindcase2xls.py', 'D:\\bq\\easytool\\xmind2case\\xmindcase2excel'],
+             pathex=['xmindcase2xls.py', 'D:\\bq\\github\\easytools\\easytools\\xmindcase2excel'],
              binaries=[],
              datas=[],
              hiddenimports=[],
